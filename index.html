@@ -20,10 +20,10 @@
 var width = 1000,
     height = 750;
 
-var color = d3.scale.category20();
+var colors = [ null, "#1f77b4", "#aec7e8", "#ff7f03"]
 
 var force = d3.layout.force()
-    .linkDistance(40)
+    .linkDistance(50)
     .size([width, height]);
 
 var svg = d3.select("body").append("svg")
@@ -49,7 +49,7 @@ d3.json("map.json", function(error, graph) {
     .enter().append("circle")
       .attr("class", "node")
 			.attr("r", function(d) { if (graph.bars.indexOf(d.name) >= 0) { return 10 } else { return 5}})
-      .style("fill", function(d) { return color(d.group); })
+      .style("fill", function(d) { return colors[d.group]; })
       .call(force.drag);
 
   node.append("title")
