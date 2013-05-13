@@ -11,8 +11,7 @@ def attach(a, b):
     with a random cost of 1-3
 
     '''
-    cost = random.randint(1,3)
-    return {"source":a, "target":b, "value":cost}
+    return {"source":a, "target":b, "value":0}
 
 
 def make_links(w, h, dead_nodes):
@@ -59,23 +58,60 @@ def make_nodes(w, h, px, dead_nodes, bars):
     return nodes
 
 
+def make_costs(links):
+    '''
+    adds costs to the links
+
+    '''
+    for l in links:
+        if l['value'] == 0:
+            cost = random.randint(1,3)
+            l['value'] = cost
+            generator = (l2 for l2 in links if l2['source'] == l['target'] and l2['target'] == l['source'])
+            for l2 in generator:
+                l2['value'] = cost
+
 def main(width, height, pixels):
     '''
     Output JSON representing a randomized grid
 
     '''
-    special_nodes = random.sample(range(height*width), 30)
+    num_cops = 50;
+    num_bars = 10;
+    num_dead = 20;
+    special_nodes = random.sample(range(height*width), num_cops+num_bars);
 
     # These will be nodes with no incoming/outgoing connections,
     # just to make the graph interesting
-    bar_nodes = special_nodes[:10]
+    bar_nodes = special_nodes[:num_bars]
 
     # These nodes will be the starting points for all drunks
-    dead_nodes = special_nodes[10:]
+    dead_nodes = special_nodes[num_cops:]
+
+    cop_links = random.sample
 
     n_list = make_nodes(width, height, pixels, dead_nodes, bar_nodes)
     l_list = make_links(width, height, dead_nodes)
-    graph = {"nodes": n_list, "links": l_list, "bars": bar_nodes}
+
+    cop_links = random.sample(l_list, num_cops);
+    cop_nodes = []
+
+    count = -1;
+    for c in cop_links:
+        count += 1;
+        source_x_coord = n_list[cop_links[count]['source']]['x']
+        source_y_coord = n_list[cop_links[count]['source']]['y']
+        target_x_coord = n_list[cop_links[count]['target']]['x']
+        target_y_coord = n_list[cop_links[count]['target']]['y']
+
+        x_coord = (source_x_coord + target_x_coord) / 2.0;
+        y_coord = (source_y_coord + target_y_coord) / 2.0;
+        cop_nodes.append({"name":count, "group": 4,
+            "fixed": True, "x":x_coord, "y":y_coord
+            })
+
+    make_costs(l_list)
+    graph = {"nodes": n_list, "links": l_list, "bars": bar_nodes, "cops":cop_nodes}
     print(json.dumps(graph))
 
 

@@ -5,7 +5,7 @@
 	var width = 1000;
 	var height = 750;
 
-	var colors = [ null, "#1f77b4", "#aec7e8", "#ff7f03"];
+	var colors = [ null, "#1f77b4", "#aec7e8", "#ff7f03", "#8c1919"];
 
 	//the object containing all drawable objects
 	var force = d3.layout.force()
@@ -36,11 +36,14 @@
 		.enter().append("circle")
 		.attr("class", "node")
 		.attr("r", function(d) { if (graph.bars.indexOf(d.name) >= 0) { return 10 } else { return 5}})
-		.style("fill", function(d) { return colors[d.group]; })
-		.call(force.drag);
+		.style("fill", function(d) { return colors[d.group]; });
 
-		node.append("title")
-		.text(function(d) { return d.name; });
+	   	var cop = svg.selectAll(".cop")
+		.data(graph.cops)
+		.enter().append("circle")
+		.attr("class", "cops")
+		.attr("r", function(d) { return 5; } )
+		.style("fill", function(d) { return colors[4];});
 
 		//This is the update function that gets called on every screen redraw
 		force.on("tick", function() {
@@ -53,11 +56,17 @@
 			node
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; });
+
+			cop
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; });
 		});
+		window.force = force;
+		window.graph.initialize(force.nodes(), force.links(), null, null);
 	});
 
 	// exporting force to the global scope.
 	// Other files will use "window.force" to access this object
-	window.force = force;
+
 
 }());
