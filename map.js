@@ -75,8 +75,33 @@
 		initializeSimulation();
 	});
 
+	var moveCopOnMap = function(copName) {
+		//This function assumes the cop has already been moved in the adj list
+
+	   	var movedCop = window.cops[copName];
+
+		//Figure out where the link is
+		var source_x_coord = movedCop.links[0].source.x;
+		var source_y_coord = movedCop.links[0].source.y;
+		var target_x_coord = movedCop.links[0].target.x;
+		var target_y_coord = movedCop.links[0].target.y;
+
+		//Midpoint formula on the link ends
+		movedCop.x = (source_x_coord + target_x_coord) /2.0;
+		movedCop.y = (source_y_coord + target_y_coord) /2.0;
+
+		return copName;
+	}
+
 	var initializeSimulation = function() {
 		window.graph.initialize(force.nodes(), force.links(), cops, null);
+
+		console.log(window.cops[2]);
+		setTimeout(function() {
+			window.graph.moveCopInGraph(2);
+			moveCopOnMap(2);
+			console.log(window.cops[2]);
+		}, 2000);
 	}
 
 
