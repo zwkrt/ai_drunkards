@@ -4,6 +4,9 @@ import json
 import random
 import sys
 
+num_cops = 50;
+num_bars = 10;
+num_dead = 20;
 
 def attach(a, b):
     '''
@@ -11,7 +14,8 @@ def attach(a, b):
     with a random cost of 1-3
 
     '''
-    return {"source":a, "target":b, "value":0}
+    return {"source":a, "target":b, "value":0,
+            "sourceIndex":a, "targetIndex":b}
 
 
 def make_links(w, h, dead_nodes):
@@ -76,9 +80,10 @@ def main(width, height, pixels):
     Output JSON representing a randomized grid
 
     '''
-    num_cops = 50;
-    num_bars = 10;
-    num_dead = 20;
+    global num_cops
+    global num_bars
+    global num_dead
+
     special_nodes = random.sample(range(height*width), num_cops+num_bars);
 
     # These will be nodes with no incoming/outgoing connections,
@@ -99,15 +104,16 @@ def main(width, height, pixels):
     count = -1;
     for c in cop_links:
         count += 1;
-        source_x_coord = n_list[cop_links[count]['source']]['x']
-        source_y_coord = n_list[cop_links[count]['source']]['y']
-        target_x_coord = n_list[cop_links[count]['target']]['x']
-        target_y_coord = n_list[cop_links[count]['target']]['y']
+        source_x_coord = n_list[ c['source'] ]['x']
+        source_y_coord = n_list[ c['source'] ]['y']
+        target_x_coord = n_list[ c['target'] ]['x']
+        target_y_coord = n_list[ c['target'] ]['y']
 
         x_coord = (source_x_coord + target_x_coord) / 2.0;
         y_coord = (source_y_coord + target_y_coord) / 2.0;
         cop_nodes.append({"name":count, "group": 4,
-            "fixed": True, "x":x_coord, "y":y_coord
+            "fixed": True, "x":x_coord, "y":y_coord,
+            "source":c['source'], 'target':c['target'],
             })
 
     make_costs(l_list)
@@ -133,14 +139,20 @@ def usage():
 
 if __name__=="__main__":
 
-    try:
-        width, height, pixels = sys.argv[1:4]
-        width = int(width)
-        height = int(height)
-        pixels = int(pixels)
-    except Exception as ex:
-        usage()
-        print(ex)
-        sys.exit()
+    if len(sys.argv) == 1:
+        width, height, pixels = 10, 10, 60
+        num_cops = 10
+        num_bars = 5
+        num_dead = 5
+    else:
+        try:
+            width, height, pixels = sys.argv[1:4]
+            width = int(width)
+            height = int(height)
+            pixels = int(pixels)
+        except Exception as ex:
+            usage()
+            print(ex)
+            sys.exit()
 
     main(width, height, pixels)
