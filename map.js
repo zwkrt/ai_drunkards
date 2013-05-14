@@ -13,8 +13,7 @@
 	.size([width, height]);
 
 	var cops = [];
-
-	var drunks = []
+	var drunks = [];
 
 	var svg = d3.select("body").append("svg")
 	.attr("width", width)
@@ -24,6 +23,7 @@
 	d3.json("map.json", function(error, mapData) {
 
 		cops = mapData.cops;
+		drunks = mapData.cops;
 
 		force
 		.nodes(mapData.nodes)
@@ -31,14 +31,14 @@
 		.start();
 
 		//create a line for every 'link' in the mapData json object
-		var link = svg.selectAll(".link")
+		var linkSelection = svg.selectAll(".link")
 		.data(mapData.links)
 		.enter().append("line")
 		.attr("class", "link")
 		.style("stroke-width", function(d) {return Math.pow(d.value, 1.2) });
 
 		//create a circular node for every 'node' in the mapData json object
-		var node = svg.selectAll(".node")
+		var nodeSelection = svg.selectAll(".node")
 		.data(mapData.nodes)
 		.enter().append("circle")
 		.attr("class", "node")
@@ -46,7 +46,7 @@
 		.style("fill", function(d) { return colors[d.group]; });
 
 		//create a circular node for every cop.
-	   	var cop = svg.selectAll(".cop")
+	   	var copSelection = svg.selectAll(".cop")
 		.data(mapData.cops)
 		.enter().append("circle")
 		.attr("class", "cops")
@@ -54,20 +54,20 @@
 		.style("fill", function(d) { return colors[4];});
 
 		//Static drawing. These do not change
-		link
+		linkSelection
 		.attr("x1", function(d) { return d.source.x; })
 		.attr("y1", function(d) { return d.source.y; })
 		.attr("x2", function(d) { return d.target.x; })
 		.attr("y2", function(d) { return d.target.y; });
 
-		node
+		nodeSelection
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; });
 
 
 		//This is the update function that gets called on every screen redraw
 		force.on("tick", function() {
-			cop
+			copSelection
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; });
 		});
@@ -94,15 +94,22 @@
 	}
 
 	var initializeSimulation = function() {
-		window.graph.initialize(force.nodes(), force.links(), cops, null);
-
-		console.log(window.cops[2]);
-		setTimeout(function() {
-			window.graph.moveCopInGraph(2);
-			moveCopOnMap(2);
-			console.log(window.cops[2]);
-		}, 2000);
+		window.graph.initialize(force.nodes(), force.links(), cops, drunks);
+		window.force = force;
+		window.svg = svg;
+		//copTestingLoop();
 	}
 
+	var copTestingLoop = function() {
+		force.start();
+		copName = Math.floor(Math.random()*10)
+		window.graph.moveCopInGraph(copName);
+		moveCopOnMap(copName);
+		console.log(window.cops[copName]);
 
-}());
+		setTimeout(copTestingLoop, 500);
+	};
+
+
+
+}())

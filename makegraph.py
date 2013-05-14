@@ -5,6 +5,7 @@ import random
 import sys
 
 num_cops = 50;
+num_drunks = 100;
 num_bars = 10;
 num_dead = 20;
 
@@ -75,35 +76,10 @@ def make_costs(links):
             for l2 in generator:
                 l2['value'] = cost
 
-def main(width, height, pixels):
-    '''
-    Output JSON representing a randomized grid
-
-    '''
-    global num_cops
-    global num_bars
-    global num_dead
-
-    special_nodes = random.sample(range(height*width), num_cops+num_bars);
-
-    # These will be nodes with no incoming/outgoing connections,
-    # just to make the graph interesting
-    bar_nodes = special_nodes[:num_bars]
-
-    # These nodes will be the starting points for all drunks
-    dead_nodes = special_nodes[num_cops:]
-
-    cop_links = random.sample
-
-    n_list = make_nodes(width, height, pixels, dead_nodes, bar_nodes)
-    l_list = make_links(width, height, dead_nodes)
-
-    cop_links = random.sample(l_list, num_cops);
+def make_cops(n_list, cop_links):
     cop_nodes = []
-
-    count = -1;
+    count = 0;
     for c in cop_links:
-        count += 1;
         source_x_coord = n_list[ c['source'] ]['x']
         source_y_coord = n_list[ c['source'] ]['y']
         target_x_coord = n_list[ c['target'] ]['x']
@@ -116,8 +92,58 @@ def main(width, height, pixels):
             "source":c['source'], 'target':c['target'],
             })
 
+        count += 1;
+
+    return cop_nodes
+
+
+def make_drunks(drunk_cnt, bar_nodes, n_list):
+    drunks = []
+    for d in range(drunk_cnt):
+        drunks.append({'name': d,
+                       'bar': random.sample(bar_nodes, 1)[0],
+                       'goal': random.sample(n_list, 1)[0]['name'],
+                       'path': [],
+                      })
+
+    return drunks;
+
+
+def main(width, height, pixels):
+    '''
+    Output JSON representing a randomized grid
+
+    '''
+    global num_cops
+    global num_drunks
+    global num_bars
+    global num_dead
+
+    special_nodes = random.sample(range(height*width), num_cops+num_bars);
+
+    # These will be nodes with no incoming/outgoing connections,
+    # just to make the graph interesting
+    bar_nodes = special_nodes[:num_bars]
+
+    # These nodes will be the starting points for all drunks
+    dead_nodes = special_nodes[num_cops:]
+
+    n_list = make_nodes(width, height, pixels, dead_nodes, bar_nodes)
+    l_list = make_links(width, height, dead_nodes)
+
+    # These links will be the starting positions for the cops
+    cop_links = random.sample(l_list, num_cops)
+
+    c_list = make_cops(n_list, cop_links)
+    d_list = make_drunks(num_drunks, bar_nodes, n_list)
+
     make_costs(l_list)
-    graph = {"nodes": n_list, "links": l_list, "bars": bar_nodes, "cops":cop_nodes}
+    graph = {"nodes": n_list,
+             "links": l_list,
+             "bars": bar_nodes,
+             "cops":c_list,
+             "drunks": d_list}
+
     print(json.dumps(graph))
 
 
@@ -130,7 +156,7 @@ def usage():
 
     w: width of the graph in nodes
     h: height of the graph in nodes
-    p: pixels between each node (50 is reasonable)
+    p: pixels between each node (50-75 is reasonable)
 
     Warning: will flood stdout if not redirected.
 
@@ -142,8 +168,13 @@ if __name__=="__main__":
     if len(sys.argv) == 1:
         width, height, pixels = 10, 10, 60
         num_cops = 10
+        num_drunks = 50
         num_bars = 5
         num_dead = 5
+
+    elif sys.argv[1] in ('-h', 'help', '--help', '?'):
+        usage()
+
     else:
         try:
             width, height, pixels = sys.argv[1:4]

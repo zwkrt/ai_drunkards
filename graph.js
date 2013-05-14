@@ -2,27 +2,35 @@
 
 
 	var initialize = function(nodes, links, cops, drunks) {
+		// Instantiate Adjacency list entries
 		var adj = {};
 		for (var i in nodes) {
 			adj[nodes[i].name] = [];
 		}
 
+		// Create references to reverse links (i.e., 56->46 and 46->56)
 		for (var i in links) {
 			links[i].cop = null;
-		}
-
-		for (var i in nodes) {
-			var nodeName = nodes[i].name;
+			links[i].drunkCount = 0;
 			for (var j in links) {
-				if (nodeName === links[j].source.name) {
-					var linkObj = {};
-					linkObj.node = links[j].target;
-					linkObj.cost = links[j].value;
-					adj[nodeName].push(linkObj);
+				if (links[i].target === links[j].source && links[i].source === links[j].target) {
+					links[i].reverse = links[j];
+					links[j].reverse = links[i];
 				}
 			}
 		}
 
+		// Create Adjacency list entries
+		for (var i in nodes) {
+			var nodeName = nodes[i].name;
+			for (var j in links) {
+				if (nodeName === links[j].source.name) {
+					adj[nodeName].push(links[j]);
+				}
+			}
+		}
+
+		//Add Cop references to links
 		for (var i in cops) {
 			cops[i].links = [];
 
@@ -30,11 +38,9 @@
 				if (cops[i].source == links[j].sourceIndex && cops[i].target == links[j].targetIndex) {
 					links[j].cop = cops[i];
 					cops[i].links.push(links[j]);
-					//console.log("adding " + cops[i].source + ", " + cops[i].target);
-				}
-				if (cops[i].source == links[j].targetIndex && cops[i].target == links[j].sourceIndex) {
-					links[j].cop = cops[i];
-					cops[i].links.push(links[j]);
+					cops[i].links.push(links[j].reverse);
+					delete links[j].sourceIndex;
+					delete links[j].targetIndex;
 					//console.log("adding " + cops[i].target + ", " + cops[i].source);
 				}
 			}
@@ -70,11 +76,7 @@
 
 		//Add the new links, and give them references to this cop
 		randCop.links.push(newLink);
-		for (var l in window.links) {
-			if (window.links[l].source === newLink.target && window.links[l].target === newLink.source) {
-				randCop.links.push(window.links[l]);
-			}
-		}
+		randCop.links.push(newLink.reverse);
 		randCop.links[0].cop = randCop;
 		randCop.links[1].cop = randCop;
 
