@@ -97,14 +97,22 @@ def make_cops(n_list, cop_links):
     return cop_nodes
 
 
-def make_drunks(drunk_cnt, bar_nodes, n_list):
+def make_drunks(drunk_cnt, bar_nodes, n_list, dead_nodes):
     drunks = []
-    for d in range(drunk_cnt):
-        drunks.append({'name': d,
-                       'bar': random.sample(bar_nodes, 1)[0],
-                       'goal': random.sample(n_list, 1)[0]['name'],
-                       'path': [],
-                      })
+    count = 0
+    while count < drunk_cnt:
+        bar = random.sample(bar_nodes, 1)[0]
+        goal = random.sample(n_list, 1)[0]['name']
+        drunk = {'name': goal,
+            'bar': bar,
+            'goal': goal,
+            'path': [],
+            }
+        if drunk['goal'] in dead_nodes:
+            continue
+        else:
+            drunks.append(drunk)
+            count += 1
 
     return drunks;
 
@@ -135,7 +143,7 @@ def main(width, height, pixels):
     cop_links = random.sample(l_list, num_cops)
 
     c_list = make_cops(n_list, cop_links)
-    d_list = make_drunks(num_drunks, bar_nodes, n_list)
+    d_list = make_drunks(num_drunks, bar_nodes, n_list, dead_nodes)
 
     make_costs(l_list)
     graph = {"nodes": n_list,
@@ -168,7 +176,7 @@ if __name__=="__main__":
     if len(sys.argv) == 1:
         width, height, pixels = 10, 10, 60
         num_cops = 10
-        num_drunks = 50
+        num_drunks = 1000
         num_bars = 5
         num_dead = 5
 

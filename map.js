@@ -23,7 +23,8 @@
 	d3.json("map.json", function(error, mapData) {
 
 		cops = mapData.cops;
-		drunks = mapData.cops;
+		drunks = mapData.drunks;
+		bars = mapData.bars;
 
 		force
 		.nodes(mapData.nodes)
@@ -35,7 +36,7 @@
 		.data(mapData.links)
 		.enter().append("line")
 		.attr("class", "link")
-		.style("stroke-width", function(d) {return Math.pow(d.value, 1.2) });
+		.style("stroke-width", function(d) {return d.value });
 
 		//create a circular node for every 'node' in the mapData json object
 		var nodeSelection = svg.selectAll(".node")
@@ -70,9 +71,16 @@
 			copSelection
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; });
+
+			colorLinks();
 		});
 
-		initializeSimulation();
+		window.linkSel = linkSelection;
+		window.force = force
+		window.cops = cops
+		window.drunks = drunks
+		window.bars = bars
+		window.initializeSimulation();
 	});
 
 	var moveCopOnMap = function(copName) {
@@ -93,23 +101,32 @@
 		return copName;
 	}
 
-	var initializeSimulation = function() {
-		window.graph.initialize(force.nodes(), force.links(), cops, drunks);
-		window.force = force;
-		window.svg = svg;
-		//copTestingLoop();
+	var colorLinks = function() {
+		for (var d in drunks) {
+			for (var l in drunks[d].path) {
+				drunks[d].path[l].drunkCount++;
+			}
+		}
+
+		linkSel.style("stroke", function(d) {
+			var numDrunks = d.drunkCount;
+			var minusValue = Math.min(255, numDrunks*80);
+			return "rgb(" + (255-minusValue) + "," + (255-minusValue) + "," + (255/*-minusValue*/) + ")";
+		});
 	}
 
 	var copTestingLoop = function() {
+		window.graph.clearData();
+		window.graph.calculateCosts();
 		force.start();
 		copName = Math.floor(Math.random()*10)
 		window.graph.moveCopInGraph(copName);
 		moveCopOnMap(copName);
-		console.log(window.cops[copName]);
-
 		setTimeout(copTestingLoop, 500);
 	};
 
-
+	window.map = {};
+	window.map.moveCopOnMap = moveCopOnMap;
+	window.copTestingLoop = copTestingLoop;
 
 }())
