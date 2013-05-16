@@ -13,16 +13,46 @@
 	stroke-opacity: .6;
 }
 
+.sim {
+	float: left;
+}
+
+#info {
+	float: left;
+	background-color: black;
+}
+
 </style>
 <head>
 <title>Drunk Driving Interception</title>
 </head>
 <body>
-</body>
+<div class="sim">
+	<svg></svg>
+</div>
+
+<div id="info">
+	<div id="buttons">
+		<button onclick="window.algorithm=window.FCHC;window.initializeSimulation();">First Choice Hill Climbing</button>
+		<br />
+		<button onclick="window.algorithm=window.SA;window.initializeSimulation();">Simulated Annealing</button>
+	</div>
+	<textarea id="status" rows ="10" columns="70"></textarea>
+</div>
+
+
+
 <script src="d3.js"></script>
 <script src="minheap.js"></script>
 <script src="map.js"></script>
 <script src="algorithms.js"></script>
 <script src="graph.js"></script>
 <script src="main.js"></script>
+<script>
+window.onload = function() {
+	alert("Welcome to the drunk driving roadblock scheduler!\n\n Orange dots are bars, red dots are cops, and the blue lines are a heat map of drunk drivers!\n\n Drunk drivers try to go from bars to other nodes on the graph, and cops catch them!\n\n Cops make edges more expensive, though, so watch out!\n\n The goal of the simulation is to catch as many drunks as possible!")
+	alert("To skip these alerts, click continue!")
+}
+</script>
+</body>
 </html>

@@ -2,8 +2,8 @@
 	//see http://lupomontero.com/using-javascript-closures-to-create-private-scopes/
 
 	// in pixels
-	var width = 1000;
-	var height = 750;
+	var width = 600;
+	var height = 600;
 
 	var colors = [ null, "#1f77b4", "#aec7e8", "#ff7f03", "#8c1919"];
 
@@ -15,7 +15,7 @@
 	var cops = [];
 	var drunks = [];
 
-	var svg = d3.select("body").append("svg")
+	var svg = d3.select("svg")
 	.attr("width", width)
 	.attr("height", height);
 
@@ -80,7 +80,6 @@
 		window.cops = cops
 		window.drunks = drunks
 		window.bars = bars
-		window.initializeSimulation();
 	});
 
 	var moveCopOnMap = function(copName) {
@@ -102,12 +101,6 @@
 	}
 
 	var colorLinks = function() {
-		for (var d in drunks) {
-			for (var l in drunks[d].path) {
-				drunks[d].path[l].drunkCount++;
-			}
-		}
-
 		linkSel.style("stroke", function(d) {
 			var numDrunks = d.drunkCount;
 			var minusValue = Math.min(255, numDrunks*80);
@@ -117,11 +110,11 @@
 
 	var copTestingLoop = function() {
 		window.graph.clearData();
-		window.graph.calculateCosts();
-		force.start();
 		copName = Math.floor(Math.random()*10)
 		window.graph.moveCopInGraph(copName);
 		moveCopOnMap(copName);
+		window.graph.calculateCosts();
+		force.start();
 		setTimeout(copTestingLoop, 500);
 	};
 

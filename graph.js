@@ -152,11 +152,16 @@
 					endNode = endNode.linkToHere.source;
 				}
 			}
+
+			for (var d in drunks) {
+				for (var l in drunks[d].path) {
+					drunks[d].path[l].drunkCount++;
+				}
+			}
 		}
 	}
 
 	var clearData = function() {
-		console.log("here");
 		for (var d in drunks) {
 			drunks[d].path = [];
 		}
